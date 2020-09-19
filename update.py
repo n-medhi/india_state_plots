@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[173]:
+# In[1]:
 
 
 import pandas as pd
@@ -14,14 +14,14 @@ import requests
 from datetime import datetime
 
 
-# In[174]:
+# In[2]:
 
 
 date = pd.to_datetime("today").strftime('_%m_%d')
 print('Latest update time is:',date)
 
 
-# In[175]:
+# In[3]:
 
 
 states = pd.read_csv("https://api.covid19india.org/csv/latest/states.csv")
@@ -33,19 +33,19 @@ states.columns= states.columns.str.lower()
 states['date'] = pd.to_datetime(states['date'], format= '%Y-%m-%d')
 
 
-# In[176]:
+# In[4]:
 
 
 do_not_include = ['India','State Unassigned']
 
 
-# In[177]:
+# In[5]:
 
 
 states
 
 
-# In[178]:
+# In[6]:
 
 
 # NOTE: 
@@ -61,13 +61,13 @@ states = states[~(states['date'] == states['date'].max())]
 #states = states[states['date'] > '2020-03-01']
 
 
-# In[179]:
+# In[7]:
 
 
 states
 
 
-# In[180]:
+# In[8]:
 
 
 ## Adding in missing dates for Kerala
@@ -85,19 +85,19 @@ rng = pd.date_range('2020-02-15', periods=16, freq='D')
 df3 = pd.DataFrame({ 'date': rng, 'state' : 'Kerala', 'confirmed' : 3, 'recovered' : 3, 'deceased' : 0, 'other': 0})
 
 
-# In[181]:
+# In[9]:
 
 
 df_Kerala = pd.concat([df1, df2, df3], ignore_index=True)
 
 
-# In[182]:
+# In[10]:
 
 
 df_Kerala
 
 
-# In[183]:
+# In[11]:
 
 
 # Kerala had 1st 3 cases in India
@@ -108,13 +108,13 @@ df_India = df_Kerala.copy()
 df_India['state'].replace({'Kerala':'India'}, inplace=True)
 
 
-# In[184]:
+# In[12]:
 
 
 df_India
 
 
-# In[185]:
+# In[13]:
 
 
 # new frame without missing dates
@@ -122,13 +122,13 @@ states_mod = pd.concat([df_Kerala, df_India, states], ignore_index=True)
 states_mod.sort_values(['date','state'], ascending=True, ignore_index=True, inplace=True)
 
 
-# In[186]:
+# In[14]:
 
 
 states_mod
 
 
-# In[187]:
+# In[15]:
 
 
 # pivot data with states as columns
@@ -141,13 +141,13 @@ pivot_cases = pivot_cases.drop(columns=do_not_include)
 #pivot_cases.replace(np.nan, 0, inplace=True)
 
 
-# In[188]:
+# In[16]:
 
 
 pivot_cases
 
 
-# In[189]:
+# In[17]:
 
 
 # new dataframe to store "daily new cases"
@@ -159,27 +159,27 @@ for column in pivot_newcases.columns[0:]:
     pivot_newcases[DailyNewCases] = pivot_newcases[column].diff()
 
 
-# In[190]:
+# In[18]:
 
 
 # fill NaN in pivot_newcases (first row) with values from pivot_cases
 pivot_newcases.fillna(pivot_cases, inplace=True)
 
 
-# In[191]:
+# In[19]:
 
 
 pivot_newcases
 
 
-# In[192]:
+# In[20]:
 
 
 # replace negative daily values by setting 0 as the lowest value
 pivot_newcases = pivot_newcases.clip(lower=0)
 
 
-# In[193]:
+# In[21]:
 
 
 # new dataframe to store "avg new cases"
@@ -191,20 +191,20 @@ for column in pivot_avgnewcases.columns[0:]:
     pivot_avgnewcases[DaySeven] = pivot_avgnewcases[column].rolling(window=7, center=False).mean()
 
 
-# In[194]:
+# In[22]:
 
 
 # fill NaN in pivot_avgnewcases (first 6 rows) with values from pivot_newcases
 pivot_recentnew = pivot_avgnewcases.fillna(pivot_newcases)
 
 
-# In[195]:
+# In[23]:
 
 
 pivot_recentnew
 
 
-# In[196]:
+# In[24]:
 
 
 # new dataframe to store "avg new cases" with centered average
@@ -216,13 +216,13 @@ for column in pivot_avgnewcases_center.columns[0:]:
     pivot_avgnewcases_center[DaySeven] = pivot_avgnewcases_center[column].rolling(window=7, min_periods=4, center=True).mean()
 
 
-# In[197]:
+# In[25]:
 
 
 pivot_avgnewcases_center
 
 
-# In[198]:
+# In[26]:
 
 
 # reset indexes of "pivoted" data
@@ -232,79 +232,79 @@ pivot_recentnew = pivot_recentnew.reset_index()
 pivot_avgnewcases_center = pivot_avgnewcases_center.reset_index()
 
 
-# In[199]:
+# In[27]:
 
 
 # convert "pivot" of total cases to "long form"
 state_cases = pd.melt(pivot_cases, id_vars=['date'], var_name='state', value_name='cases')
 
 
-# In[200]:
+# In[28]:
 
 
 state_cases
 
 
-# In[201]:
+# In[29]:
 
 
 # convert "pivot" of daily new cases to "long form"
 state_newcases = pd.melt(pivot_newcases, id_vars=['date'], var_name='state', value_name='new_cases')
 
 
-# In[202]:
+# In[30]:
 
 
 state_newcases
 
 
-# In[203]:
+# In[31]:
 
 
 # convert "pivot" of recent new cases to "long form" (7-day avg w first 6 days from "new cases")
 state_recentnew = pd.melt(pivot_recentnew, id_vars=['date'], var_name='state', value_name='recent_new')
 
 
-# In[204]:
+# In[32]:
 
 
 state_recentnew
 
 
-# In[205]:
+# In[33]:
 
 
 # convert "pivot" of centered average new cases to "long form"
 state_avgnewcases_center = pd.melt(pivot_avgnewcases_center, id_vars=['date'], var_name='state', value_name='avg_cases')
 
 
-# In[206]:
+# In[34]:
 
 
 state_avgnewcases_center
 
 
-# In[207]:
+# In[35]:
 
 
 # merge the 4 "long form" dataframes based on index
 state_merge = pd.concat([state_cases, state_newcases, state_avgnewcases_center, state_recentnew], axis=1)
 
 
-# In[208]:
+# In[36]:
 
 
 state_merge
 
 
-# In[209]:
+# In[37]:
 
 
 # remove duplicate columns
 state_merge = state_merge.loc[:,~state_merge.columns.duplicated()]
 
 
-# In[210]:
+# In[38]:
 
 
 # dataframe with only the most recent date for each state
@@ -312,13 +312,13 @@ state_merge = state_merge.loc[:,~state_merge.columns.duplicated()]
 state_latest = state_merge.loc[state_merge.groupby('state').date.idxmax().values]
 
 
-# In[211]:
+# In[39]:
 
 
 state_latest
 
 
-# In[212]:
+# In[40]:
 
 
 # dataframe with peak average cases for each state
@@ -326,14 +326,14 @@ peak_avg_cases = state_merge.groupby('state')['recent_new'].agg(['max']).reset_i
 peak_avg_cases = peak_avg_cases.rename(columns = {'max':'peak_recent_new'})
 
 
-# In[213]:
+# In[41]:
 
 
 # merging total cases onto the merged dataframe
 state_color_test = state_latest.merge(peak_avg_cases, on='state', how='left')
 
 
-# In[214]:
+# In[42]:
 
 
 # NOTE:
@@ -343,13 +343,13 @@ state_color_test = state_latest.merge(peak_avg_cases, on='state', how='left')
 state_color_test['recent_new_int'] = state_color_test['recent_new'].astype(int)
 
 
-# In[215]:
+# In[43]:
 
 
 state_color_test
 
 
-# In[216]:
+# In[44]:
 
 
 #choosing colors
@@ -369,13 +369,13 @@ def conditions(state_color_test):
 state_color_test['color'] = state_color_test.apply(conditions, axis=1)
 
 
-# In[217]:
+# In[45]:
 
 
 state_color_test
 
 
-# In[218]:
+# In[46]:
 
 
 # dataframe with just state, total cases, and color
@@ -385,50 +385,50 @@ state_total_color = state_color_test[['state','cases','color']]
 state_total_color = state_total_color.rename(columns = {'cases':'total_cases'})
 
 
-# In[219]:
+# In[47]:
 
 
 # merging total cases onto the merged dataframe
 state_final = state_merge.merge(state_total_color, on='state', how='left')
 
 
-# In[220]:
+# In[48]:
 
 
 state_final = state_final[['state','date','cases','new_cases','avg_cases','total_cases','recent_new','color']]
 
 
-# In[221]:
+# In[49]:
 
 
 state_final
 
 
-# In[222]:
+# In[50]:
 
 
 # rename states
 staterename = {'Andaman and Nicobar Islands' : 'Andaman & Nicobar Islands',
-              'Dadra and Nagar Haveli and Daman and Diu' : 'Dadra & Nagar Haveli & Daman & Diu',
+              'Dadra and Nagar Haveli and Daman and Diu' : 'Dadra, Nagar Haveli, Daman & Diu',
               'Jammu and Kashmir' : 'Jammu & Kashmir'}
 
 state_final['state'] = state_final['state'].replace(staterename)
 
 
-# In[223]:
+# In[51]:
 
 
 # drop rows where cumulative cases is NaN (dates before reported cases)
 state_final = state_final.dropna(subset=['cases']) 
 
 
-# In[224]:
+# In[52]:
 
 
 state_final
 
 
-# In[225]:
+# In[53]:
 
 
 ## Remove the 'cases' column to match format of Era's state result file 
@@ -437,7 +437,7 @@ state_final = state_final[['state','date','new_cases','avg_cases','total_cases',
 #state_final.to_csv('state_final.csv', index=False)
 
 
-# In[226]:
+# In[54]:
 
 
 # dataframe with just state and color
@@ -447,7 +447,7 @@ state_color = state_color_test[['state','color']]
 #state_color.to_csv('stateColors.csv', index=False)
 
 
-# In[227]:
+# In[55]:
 
 
 # https://blogs.transparent.com/hindi/indias-states-and-union-territories/
@@ -461,7 +461,7 @@ translation  = {"Andaman & Nicobar Islands" : "अंडमान और नि�
                 "Bihar" : "बिहार",
                 "Chandigarh" : "चंडीगढ़",
                 "Chhattisgarh" : "छत्तीसगढ़",
-                "Dadra & Nagar Haveli & Daman & Diu" : "दादरा और नगर हवेली और दमन और दीव",
+                "Dadra, Nagar Haveli, Daman & Diu" : "दादरा और नगर हवेली और दमन और दीव",
                 "Delhi" : "दिल्ली",
                 "Goa" : "गोआ",
                 "Gujarat" : "गुजरात",
@@ -492,25 +492,25 @@ translation  = {"Andaman & Nicobar Islands" : "अंडमान और नि�
                 "Lakshadweep" : "लक्षद्वीप"}
 
 
-# In[228]:
+# In[56]:
 
 
 #state_final_hindi = state_final.copy()
 
 
-# In[229]:
+# In[57]:
 
 
 #state_final_hindi['state'] = state_final_hindi['state'].replace(translation)
 
 
-# In[230]:
+# In[58]:
 
 
 #state_final_hindi.to_csv('state_final_hindi.csv', index=False)
 
 
-# In[231]:
+# In[59]:
 
 
 # adding Hindi names of states
