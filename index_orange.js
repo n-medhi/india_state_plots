@@ -136,7 +136,7 @@ var margin = {top: 58, right: 38, bottom: 58, left: 35},
         var curr_date = (d3.timeParse("%Y-%m-%d")(d.date));
         focus.attr("transform", "translate(" + x(d3.timeParse("%Y-%m-%d")(d.date)) + "," + ty(+d.avg_cases) + ")");
         focus.select(".tooltip-date").text(d3.timeFormat("%B %d")(curr_date));
-        focus.select(".tooltip-info-avg").text("7-day avg: "+ d3.format(",")(Math.round(+d.recent_new)));
+        focus.select(".tooltip-info-avg").text("7-day avg: "+ d3.format(",")(Math.floor(+d.recent_new)));
         focus.select(".tooltip-info-new").text("New: "+ d3.format(",")(+d.new_cases));
       });
   })
@@ -170,6 +170,6 @@ var margin = {top: 58, right: 38, bottom: 58, left: 35},
     .attr("text-anchor", "middle")
     .attr("transform",
           "translate(" + ((width-margin.left)/2) + " ," + (height+55) + ")") //centers titles
-    .text(function(d){ return("Recent New/Day: "+ d3.format(",")(Math.round(d.values[d.values.length-1].recent_new)))})
+    .text(function(d){ return("Recent New/Day: "+ d3.format(",")(Math.floor(d.values[d.values.length-1].recent_new)))})
     .style("fill", "grey");
 })
