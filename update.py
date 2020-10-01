@@ -352,6 +352,12 @@ state_color_test
 # In[44]:
 
 
+## UPDATE 9/25/20 - modified green logic due to quirk caused by original logic on countries page
+## original logic caused Uruguay with avg ~16 cases to appear red because 16 > 50% of its low peak of 24
+
+## Orignial green logic:
+## if state_color_test['recent_new_int'] <= n_0*f_0 or state_color_test['recent_new_int'] <= n_0 and state_color_test['recent_new_int'] <= f_0*state_color_test['peak_recent_new']:
+
 #choosing colors
 n_0 = 20
 f_0 = 0.5
@@ -359,7 +365,7 @@ f_1 = 0.2
 
 # https://stackoverflow.com/questions/49586471/add-new-column-to-python-pandas-dataframe-based-on-multiple-conditions/49586787
 def conditions(state_color_test):
-    if state_color_test['recent_new_int'] <= n_0*f_0 or state_color_test['recent_new_int'] <= n_0 and state_color_test['recent_new_int'] <= f_0*state_color_test['peak_recent_new']:
+    if state_color_test['recent_new_int'] <= n_0:
         return 'green'
     elif state_color_test['recent_new_int'] <= 1.5*n_0 and state_color_test['recent_new_int'] <= f_0*state_color_test['peak_recent_new'] or state_color_test['recent_new_int'] <= state_color_test['peak_recent_new']*f_1:
         return 'orange'
@@ -450,73 +456,29 @@ state_color = state_color_test[['state','color']]
 # In[55]:
 
 
-# https://blogs.transparent.com/hindi/indias-states-and-union-territories/
-
-# "Delhi" : "दिल्ली राष्ट्रीय राजधानी क्षेत्र"  # (National Capital Territory of Delhi)
-
-translation  = {"Andaman & Nicobar Islands" : "अंडमान और निकोबार द्वीप समूह",
-                "Andhra Pradesh" : "आंध्र प्रदेश",
-                "Arunachal Pradesh" : "अरुणाचल प्रदेश",
-                "Assam" : "असम",
-                "Bihar" : "बिहार",
-                "Chandigarh" : "चंडीगढ़",
-                "Chhattisgarh" : "छत्तीसगढ़",
-                "Dadra, Nagar Haveli, Daman & Diu" : "दादरा और नगर हवेली और दमन और दीव",
-                "Delhi" : "दिल्ली",
-                "Goa" : "गोआ",
-                "Gujarat" : "गुजरात",
-                "Haryana" : "हरियाणा",
-                "Himachal Pradesh" : "हिमाचल प्रदेश",
-                "Jammu & Kashmir" : "जम्मू और कश्मीर",
-                "Jharkhand" : "झारखंड",
-                "Karnataka" : "कर्नाटक",
-                "Kerala" : "केरल",
-                "Ladakh" : "लद्दाख़",
-                "Madhya Pradesh" : "मध्य प्रदेश",
-                "Maharashtra" : "महाराष्ट्र",
-                "Manipur" : "मणिपुर",
-                "Meghalaya" : "मेघालय",
-                "Mizoram" : "मिज़ोरम",
-                "Nagaland" : "नागालैंड",
-                "Odisha" : "ओडिशा",
-                "Puducherry" : "पुडुचेरी",
-                "Punjab" : "पंजाब",
-                "Rajasthan" : "राजस्थान",
-                "Sikkim" : "सिक्किम",
-                "Tamil Nadu" : "तमिलनाडु",
-                "Telangana" : "तेलंगाना",
-                "Tripura" : "त्रिपुरा",
-                "Uttar Pradesh" : "उत्तर प्रदेश",
-                "Uttarakhand" : "उत्तराखंड",
-                "West Bengal" : "पश्चिम बंगाल",
-                "Lakshadweep" : "लक्षद्वीप"}
+state_list = pd.read_csv("state_list.csv")
 
 
 # In[56]:
 
 
-#state_final_hindi = state_final.copy()
+state_list
 
 
 # In[57]:
 
 
-#state_final_hindi['state'] = state_final_hindi['state'].replace(translation)
+# merging total cases onto the merged dataframe
+state_final_trans = state_final.merge(state_list, on='state', how='left')
 
 
 # In[58]:
 
 
-#state_final_hindi.to_csv('state_final_hindi.csv', index=False)
-
-
-# In[59]:
-
-
 # adding Hindi names of states
-state_final['state_hindi'] = state_final['state']
+#state_final['state_hindi'] = state_final['state']
 
-state_final['state_hindi'] = state_final['state_hindi'].replace(translation)
+#state_final['state_hindi'] = state_final['state_hindi'].replace(translation)
 
-state_final.to_csv('result.csv', index=False)
+state_final_trans.to_csv('result.csv', index=False)
 
