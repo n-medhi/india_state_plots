@@ -480,5 +480,18 @@ state_final_trans = state_final.merge(state_list, on='state', how='left')
 
 #state_final['state_hindi'] = state_final['state_hindi'].replace(translation)
 
-state_final_trans.to_csv('result.csv', index=False)
+#state_final_trans.to_csv('result.csv', index=False)
+
+
+# In[59]:
+
+
+# filter to start at Mar 1, 2020
+state_final_trans_mar1 = state_final_trans[state_final_trans['date'] >= '2020-03-01']
+
+
+# In[60]:
+
+
+state_final_trans_mar1.to_csv('result.csv', index=False)
 
